@@ -84,8 +84,7 @@ public class TennisGame2 implements TennisGame
     }
 
     private int getDiferencia() {
-        int diferencia = p1Point - p2Point;
-        return diferencia;
+        return p1Point - p2Point;
     }
 
     private String empate() {
