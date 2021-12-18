@@ -1,10 +1,14 @@
+import java.util.Map;
+import java.util.Objects;
 
 public class TennisGame1 implements TennisGame {
-    
-    private int m_score1 = 0;
-    private int m_score2 = 0;
-    private String player1Name;
-    private String player2Name;
+
+    private static final String ADVANTAGE = "Advantage ";
+    private static final String WIN = "Win for ";
+    private int player1Score = 0;
+    private int player2Score = 0;
+    private final String player1Name;
+    private final String player2Name;
 
     public TennisGame1(String player1Name, String player2Name) {
         this.player1Name = player1Name;
@@ -12,65 +16,80 @@ public class TennisGame1 implements TennisGame {
     }
 
     public void wonPoint(String playerName) {
-        if (playerName == "player1")
-            m_score1 += 1;
+        if (Objects.equals(playerName, "player1"))
+            player1Score += 1;
         else
-            m_score2 += 1;
+            player2Score += 1;
     }
 
     public String getScore() {
-        String score = "";
-        int tempScore=0;
-        if (m_score1==m_score2)
-        {
-            switch (m_score1)
-            {
-                case 0:
-                        score = "Love-All";
-                    break;
-                case 1:
-                        score = "Fifteen-All";
-                    break;
-                case 2:
-                        score = "Thirty-All";
-                    break;
-                default:
-                        score = "Deuce";
-                    break;
-                
-            }
-        }
-        else if (m_score1>=4 || m_score2>=4)
-        {
-            int minusResult = m_score1-m_score2;
-            if (minusResult==1) score ="Advantage player1";
-            else if (minusResult ==-1) score ="Advantage player2";
-            else if (minusResult>=2) score = "Win for player1";
-            else score ="Win for player2";
-        }
-        else
-        {
-            for (int i=1; i<3; i++)
-            {
-                if (i==1) tempScore = m_score1;
-                else { score+="-"; tempScore = m_score2;}
-                switch(tempScore)
-                {
-                    case 0:
-                        score+="Love";
-                        break;
-                    case 1:
-                        score+="Fifteen";
-                        break;
-                    case 2:
-                        score+="Thirty";
-                        break;
-                    case 3:
-                        score+="Forty";
-                        break;
-                }
-            }
-        }
-        return score;
+
+        if (existeIgualdad())
+            return igualdad();
+
+        if (puntajeMayorIgualCuatro())
+            return ventajaOGanador();
+
+        return puntuacion();
     }
+
+    private boolean existeIgualdad() {
+        return player1Score - player2Score == 0;
+    }
+
+    private String igualdad() {
+        Map<Integer, String> igualdades = Map.of(
+                0, "Love-All",
+                1, "Fifteen-All",
+                2, "Thirty-All",
+                3, "Deuce"
+        );
+
+        int score = player1Score > 3 ? 3 : player1Score;
+
+        return igualdades.get(score);
+    }
+
+
+    private boolean puntajeMayorIgualCuatro() {
+        return player1Score >= 4 || player2Score >= 4;
+    }
+
+    private String ventajaOGanador() {
+        int minusResult = player1Score - player2Score;
+
+        if (existeGanador(minusResult))
+            return elegirGanador(minusResult);
+
+        return elegirVentaja(minusResult);
+
+    }
+
+    private boolean existeGanador(int minusResult) {
+        return Math.abs(minusResult) >= 2;
+    }
+
+    private String elegirGanador(int minusResult) {
+        String ganador = minusResult >= 2 ? player1Name : player2Name;
+
+        return WIN + ganador;
+    }
+
+    private String elegirVentaja(int minusResult) {
+        String ventajaPara = minusResult == 1 ? player1Name : player2Name;
+
+        return ADVANTAGE + ventajaPara;
+    }
+
+    private String puntuacion() {
+        Map<Integer, String> puntos = Map.of(
+                0, "Love",
+                1, "Fifteen",
+                2, "Thirty",
+                3, "Forty"
+        );
+
+        return puntos.get(player1Score) + "-" + puntos.get(player2Score);
+    }
+
 }
